@@ -7,31 +7,25 @@ from sklearn.ensemble import RandomForestClassifier
 import numpy as np
 from datetime import datetime, timedelta
 import psycopg2
+import os
+from dotenv import load_dotenv, find_dotenv
 
 
 
-spark = SparkSession.builder \
-    .appName("KafkaFraudDetection") \
-    .getOrCreate()
+# spark = SparkSession.builder \
+#     .appName("KafkaFraudDetection") \
+#     .getOrCreate()
+
+
+
+_ = load_dotenv(find_dotenv())
+
 
 
 def get_db_connection():
-    conn = psycopg2.connect(
-        host = "timescaledb",
-        database = "fraud_database",
-        user = "user",
-        password = "password"
-    )
+    conn_str = os.environ["TIMESCALE_SERVICE_URL"]
+    conn = psycopg2.connect(conn_str)
     return conn
-
-def get_timescale_connection():
-    return{
-        "url": "jdbc:postgresql://timescaledb:5432/fraud_detection",
-        "driver": "org.postgresql.Driver",
-        "user": "user",  
-        "password": "password",
-        "dbtable": "account_details"
-    }
 
 
 schema = StructType([
@@ -96,4 +90,12 @@ transaction_df = transaction_json.select("transaction_data.*")
 
 
 
+try:
+    with get_db_connection() as conn:
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT * FROM conditions")
+            results = cursor.fetchall()
+            print(results)
+except Exception as e:
+    print(f"An error occurred: {e}")
 
