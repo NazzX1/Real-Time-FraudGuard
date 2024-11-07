@@ -33,7 +33,7 @@ class TransactionProducer:
                 self.producer.send(self.topic, value = transaction)
                 print(f'Produced: {transaction}')
                 
-                time.sleep(1)
+                time.sleep(1000)
 
 
 if __name__ == '__main__':
